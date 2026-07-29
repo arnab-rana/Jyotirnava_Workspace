@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jyotirnava OS - Business Edition</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Google Fonts & Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    
+    <!-- CDNs for Preserved Apps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
+    <!-- NEW CDNs for Financial/ERP Apps -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Desktop Environment -->
+    <main id="desktop">
+        <!-- Center-Left Desktop Icons -->
+        <div id="desktop-icons" class="grid-layout center-left">
+            <div class="app-icon" data-app="clock">
+                <div class="squircle clock-color"><span class="material-icons-round">schedule</span></div>
+                <span class="app-label">Clock</span>
+            </div>
+            <div class="app-icon" data-app="weather">
+                <div class="squircle weather-color"><span class="material-icons-round">cloud</span></div>
+                <span class="app-label">Weather</span>
+            </div>
+            <div class="app-icon" data-app="news">
+                <div class="squircle news-color"><span class="material-icons-round">article</span></div>
+                <span class="app-label">News</span>
+            </div>
+            <div class="app-icon" data-app="flow">
+                <div class="squircle flow-color"><span class="material-icons-round">view_kanban</span></div>
+                <span class="app-label">Flow</span>
+            </div>
+            <div class="app-icon" data-app="calendar">
+                <div class="squircle cal-color"><span class="material-icons-round">calendar_month</span></div>
+                <span class="app-label">Calendar</span>
+            </div>
+            <div class="app-icon" data-app="vault">
+                <div class="squircle vault-color"><span class="material-icons-round">lock</span></div>
+                <span class="app-label">Vault</span>
+            </div>
+            <div class="app-icon" data-app="ats">
+                <div class="squircle gallery-color"><span class="material-icons-round">contact_page</span></div>
+                <span class="app-label">ATS Resume</span>
+            </div>
+            <div class="app-icon" id="dnd-toggle-btn" data-app="dnd">
+                <div class="squircle dnd-color"><span class="material-icons-round">do_not_disturb_on</span></div>
+                <span class="app-label">DND</span>
+            </div>
+            <div class="app-icon" data-app="maps">
+                <div class="squircle maps-color"><span class="material-icons-round">map</span></div>
+                <span class="app-label">Maps</span>
+            </div>
+            <div class="app-icon" data-app="search">
+                <div class="squircle search-color"><span class="material-icons-round">search</span></div>
+                <span class="app-label">Search</span>
+            </div>
+            <div class="app-icon" data-app="whiteboard">
+                <div class="squircle wb-color"><span class="material-icons-round">brush</span></div>
+                <span class="app-label">Whiteboard</span>
+            </div>
+            <div class="app-icon" data-app="announcement">
+                <div class="squircle ann-color"><span class="material-icons-round">campaign</span></div>
+                <span class="app-label">Announcements</span>
+            </div>
+            <div class="app-icon" data-app="conference">
+                <div class="squircle conf-color"><span class="material-icons-round">video_camera_front</span></div>
+                <span class="app-label">Meet Room</span>
+            </div>
+            <div class="app-icon" data-app="poll">
+                <div class="squircle poll-color"><span class="material-icons-round">poll</span></div>
+                <span class="app-label">Polls</span>
+            </div>
+            <div class="app-icon" data-app="cabin">
+                <div class="squircle cabin-color"><span class="material-icons-round">meeting_room</span></div>
+                <span class="app-label">Smart Cabin</span>
+            </div>
+
+            <!-- NEW: Yotira Invoice Generator & Financial Dashboard -->
+            <div class="app-icon" data-app="invoice">
+                <div class="squircle inv-color"><span class="material-icons-round">receipt_long</span></div>
+                <span class="app-label">Invoice</span>
+            </div>
+            <div class="app-icon" data-app="finance">
+                <div class="squircle fin-color"><span class="material-icons-round">query_stats</span></div>
+                <span class="app-label">FinAnalysis</span>
+            </div>
+        </div>
+
+        <!-- App Windows Container -->
+        <div id="window-container">
+            
+            <!-- PRESERVED APPS -->
+            <div class="os-window" id="window-clock">
+                <div class="title-bar"><span>Yotira Clock</span><button class="close-btn" data-close="clock"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content clock-app">
+                    <div class="tabs"><button class="tab-btn active" data-tab="world">World</button><button class="tab-btn" data-tab="timer">Timer</button><button class="tab-btn" data-tab="alarm">Alarm</button></div>
+                    <div class="tab-content active" id="tab-world"><div id="world-clocks-list"></div></div>
+                    <div class="tab-content" id="tab-timer"><h2 id="stopwatch-display">00:00:00.00</h2><div class="timer-controls"><button id="sw-start">Start</button><button id="sw-lap">Lap</button><button id="sw-reset">Reset</button></div><ul id="lap-list"></ul></div>
+                    <div class="tab-content" id="tab-alarm"><div class="alarm-controls"><input type="time" id="alarm-time"><button id="add-alarm">Set</button></div><ul id="alarm-list"></ul></div>
+                </div>
+            </div>
+
+            <div class="os-window" id="window-notes">
+                <div class="title-bar"><span>Yotira Notes</span><button class="close-btn" data-close="notes"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content notes-app">
+                    <div class="note-creator"><input type="text" id="note-title" placeholder="Title"><textarea id="note-body" placeholder="Take a note..."></textarea><div class="note-actions"><input type="color" id="note-color" value="#ffffff"><button id="save-note">Save</button></div></div>
+                    <div class="notes-grid" id="notes-grid"></div>
+                </div>
+            </div>
+
+            <div class="os-window" id="window-news">
+                <div class="title-bar"><span>Yotira News</span><button class="close-btn" data-close="news"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content news-app">
+                    <div class="tabs"><button class="news-tab-btn active" data-feed="world">World</button><button class="news-tab-btn" data-feed="business">Business</button><button class="news-tab-btn" data-feed="india">India</button></div>
+                    <div id="news-feed-container" class="news-feed">Loading news...</div>
+                </div>
+            </div>
+
+            <div class="os-window" id="window-weather">
+                <div class="title-bar"><span>Yotira Weather</span><button class="close-btn" data-close="weather"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content weather-app">
+                    <div id="weather-display"><h2 id="weather-location">Fetching location...</h2><h1 id="weather-temp">--°C</h1><p id="weather-desc">--</p><div class="weather-details"><span id="weather-wind">Wind: -- km/h</span></div></div>
+                </div>
+            </div>
+
+            <div class="os-window" id="window-maps">
+                <div class="title-bar"><span>Yotirna Maps</span><button class="close-btn" data-close="maps"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content maps-app">
+                    <div class="maps-ui"><input type="text" id="map-start" placeholder="Start Location (e.g. New Delhi)"><input type="text" id="map-dest" placeholder="Destination (e.g. Agra)"><button id="map-route-btn">Route</button></div>
+                    <div id="map-container"></div><div class="route-info" id="map-route-info">Ready to route.</div>
+                </div>
+            </div>
+
+            <div class="os-window" id="window-tasks">
+                <div class="title-bar"><span>Yotira Tasks</span><button class="close-btn" data-close="tasks"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content tasks-app">
+                    <div class="tasks-header"><h2>My Tasks</h2></div>
+                    <div class="tasks-input-area"><input type="text" id="task-input" placeholder="What needs to be done?"><button id="task-add-btn">Add</button></div><ul id="task-list"></ul>
+                </div>
+            </div>
+
+            <div class="os-window" id="window-search">
+                <div class="title-bar"><span>Yotira Search</span><button class="close-btn" data-close="search"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content" style="background: white;">
+                    <div class="search-app" id="search-app-container">
+                        <div class="search-logo"><span>Y</span><span>o</span><span>t</span><span>i</span><span>r</span><span>a</span></div>
+                        <div style="width: 100%; max-width: 650px; margin-top: 20px;">
+                            <script async src="https://cse.google.com/cse.js?cx=PUT_YOUR_ENGINE_ID_HERE"></script><div class="gcse-search"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="os-window" id="window-ai">
+                <div class="title-bar"><span>Yotira AI</span><button class="close-btn" data-close="ai"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content ai-app">
+                    <div id="ai-chat-box"><div class="ai-msg ai-system">Hello! I am Yotira AI. I have been upgraded with multi-model fallback routing. How can I help?</div></div>
+                    <div class="ai-input-area"><input type="text" id="ai-input" placeholder="Message Yotira AI..."><button id="ai-send-btn"><span class="material-icons-round">send</span></button></div>
+                </div>
+            </div>
+
+            <div class="os-window" id="window-ats">
+                <div class="title-bar"><span>Yotira ATS Analyzer</span><button class="close-btn" data-close="ats"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content ats-app">
+                    <div class="ats-header"><h2>Resume AI Analyzer</h2><p>Upload a PDF resume to extract insights.</p></div>
+                    <div class="ats-upload-box"><input type="file" id="resume-upload" accept="application/pdf"><button id="analyze-resume-btn">Analyze Resume</button></div>
+                    <div id="ats-loading" style="display:none; text-align:center; padding: 20px; color:#888;"><span class="material-icons-round" style="animation: spin 1s linear infinite;">autorenew</span><p>Processing...</p></div><div id="ats-results"></div>
+                </div>
+            </div>
+
+            <div class="os-window" id="window-flow">
+                <div class="title-bar"><span>Yotira Flow</span><button class="close-btn" data-close="flow"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content flow-app">
+                    <div class="flow-header"><input type="text" id="flow-input" placeholder="Enter a new task..."><button id="flow-add-btn">Add to Backlog</button></div>
+                    <div class="kanban-board">
+                        <div class="kanban-col" data-col="backlog"><h3>Backlog</h3><div class="kanban-dropzone"></div></div>
+                        <div class="kanban-col" data-col="progress"><h3>In Progress</h3><div class="kanban-dropzone"></div></div>
+                        <div class="kanban-col" data-col="completed"><h3>Completed</h3><div class="kanban-dropzone"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="os-window" id="window-calendar">
+                <div class="title-bar"><span>Yotira Calendar</span><button class="close-btn" data-close="calendar"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content calendar-app">
+                    <div class="cal-header"><button id="cal-prev"><span class="material-icons-round">chevron_left</span></button><h2 id="cal-month-year">Month Year</h2><button id="cal-next"><span class="material-icons-round">chevron_right</span></button></div>
+                    <div class="cal-grid-header"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div>
+                    <div id="cal-grid" class="cal-grid"></div>
+                </div>
+            </div>
+
+            <div class="os-window" id="window-sticky">
+                <div class="title-bar"><span>Sticky Notes Board</span><button class="close-btn" data-close="sticky"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content sticky-app" id="sticky-workspace">
+                    <div class="sticky-controls"><button id="add-sticky-btn" class="sys-btn"><span class="material-icons-round">add</span> New Note</button></div>
+                </div>
+            </div>
+
+            <div class="os-window" id="window-vault">
+                <div class="title-bar"><span>Secure Local Vault</span><button class="close-btn" data-close="vault"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content vault-app">
+                    <div class="vault-upload-zone" id="vault-dropzone"><span class="material-icons-round" style="font-size:48px; color:#007aff;">cloud_upload</span><p>Drag & Drop files here</p><small>Files are securely encrypted in your browser's local IndexedDB. Zero network transfers.</small><input type="file" id="vault-file-input" style="display:none;"></div>
+                    <div class="vault-list-header">Stored Files</div><ul id="vault-file-list" class="vault-list"></ul>
+                </div>
+            </div>
+
+            <div class="os-window" id="window-whiteboard">
+                <div class="title-bar"><span>Yotira Whiteboard</span><button class="close-btn" data-close="whiteboard"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content wb-app">
+                    <div class="wb-toolbar">
+                        <div class="wb-tools"><input type="color" id="wb-color" value="#000000"><input type="range" id="wb-size" min="1" max="50" value="5"><button id="wb-eraser" class="sys-btn"><span class="material-icons-round">ink_eraser</span></button><button id="wb-clear" class="sys-btn" style="background:#ff3b30;"><span class="material-icons-round">delete</span></button></div>
+                        <button id="wb-download" class="sys-btn"><span class="material-icons-round">download</span> Save PNG</button>
+                    </div>
+                    <canvas id="wb-canvas" width="760" height="420"></canvas>
+                </div>
+            </div>
+
+            <div class="os-window" id="window-announcement">
+                <div class="title-bar"><span>Announcement Board</span><button class="close-btn" data-close="announcement"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content ann-app">
+                    <div class="ann-header"><textarea id="ann-input" placeholder="Type a new corporate announcement..."></textarea><button id="ann-post-btn" class="sys-btn">Post Announcement</button></div>
+                    <div class="ann-list" id="ann-list"></div>
+                </div>
+            </div>
+
+            <div class="os-window" id="window-conference">
+                <div class="title-bar"><span>Virtual Conference Room</span><button class="close-btn" data-close="conference"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content conf-app">
+                    <div class="conf-hero"><span class="material-icons-round conf-icon">video_camera_front</span><h2>Secure Virtual Meetings</h2><p>Start a new encrypted video conference session instantly.</p><button id="conf-join-btn" class="sys-btn conf-btn">Join Virtual Room</button></div>
+                </div>
+            </div>
+
+            <div class="os-window" id="window-poll">
+                <div class="title-bar"><span>Yotira Polls</span><button class="close-btn" data-close="poll"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content poll-app">
+                    <div class="tabs"><button class="poll-tab-btn active" data-tab="active">Active Polls</button><button class="poll-tab-btn" data-tab="create">Create Poll</button></div>
+                    <div class="tab-content active" id="poll-tab-active"><div id="poll-list-container"></div></div>
+                    <div class="tab-content" id="poll-tab-create">
+                        <div class="poll-create-form">
+                            <input type="text" id="poll-q" placeholder="Enter your question..."><input type="text" class="poll-opt" placeholder="Option 1"><input type="text" class="poll-opt" placeholder="Option 2"><input type="text" class="poll-opt" placeholder="Option 3 (Optional)"><input type="text" class="poll-opt" placeholder="Option 4 (Optional)"><button id="poll-create-btn" class="sys-btn" style="width:100%; justify-content:center; margin-top:10px;">Publish Poll</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="os-window" id="window-cabin">
+                <div class="title-bar"><span>Smart Cabin Manager</span><button class="close-btn" data-close="cabin"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content cabin-app">
+                    <div class="cabin-dashboard">
+                        <h2>Manager's Cabin Status</h2>
+                        <div class="cabin-status-display" id="cabin-current-status"><div class="status-dot" id="cabin-dot"></div><h1 id="cabin-text">Loading...</h1></div><p id="cabin-subtext">Checking availability...</p>
+                        <div style="margin-top:40px;"><button id="cabin-knock-btn" class="sys-btn" style="margin:0 auto; padding:12px 24px; font-size:16px;"><span class="material-icons-round">front_hand</span> Simulate Knock</button></div>
+                    </div>
+                    <div class="cabin-modal" id="cabin-modal" style="display:none;">
+                        <div class="cabin-modal-content">
+                            <h3>Someone is knocking!</h3><p>Update your cabin status:</p>
+                            <div class="cabin-modal-actions"><button class="cabin-res-btn free" data-status="free">Free (Come In)</button><button class="cabin-res-btn meeting" data-status="meeting">In Meeting (Wait 10m)</button><button class="cabin-res-btn dnd" data-status="dnd">DND (End of Day)</button></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==============================================
+                 NEW FIN/ERP APP CONTAINERS
+                 ============================================== -->
+
+            <!-- 1. Yotira Invoice Generator -->
+            <div class="os-window" id="window-invoice">
+                <div class="title-bar"><span>Yotira Invoice Generator</span><button class="close-btn" data-close="invoice"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content inv-app">
+                    <div class="inv-controls-area">
+                        <div class="inv-inputs">
+                            <input type="text" id="inv-client" placeholder="Client Name">
+                            <input type="date" id="inv-date">
+                        </div>
+                        <div class="inv-inputs">
+                            <input type="text" id="inv-item-desc" placeholder="Item Description" style="flex:2;">
+                            <input type="number" id="inv-item-qty" placeholder="Qty" min="1" value="1">
+                            <input type="number" id="inv-item-price" placeholder="Price ($)" min="0">
+                            <button id="add-inv-item-btn" class="sys-btn">Add</button>
+                        </div>
+                        <button id="download-inv-btn" class="sys-btn" style="background:#28a745;"><span class="material-icons-round">picture_as_pdf</span> Download PDF</button>
+                    </div>
+
+                    <div class="invoice-paper-wrapper">
+                        <div id="invoice-print-area" class="invoice-paper">
+                            <div class="inv-paper-header">
+                                <h1>INVOICE</h1>
+                                <div class="inv-meta">
+                                    <p><strong>Billed To:</strong> <span id="disp-client">Client Name</span></p>
+                                    <p><strong>Date:</strong> <span id="disp-date">MM/DD/YYYY</span></p>
+                                </div>
+                            </div>
+                            <table class="inv-table">
+                                <thead><tr><th>Description</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
+                                <tbody id="inv-table-body">
+                                    <!-- Items injected here -->
+                                </tbody>
+                            </table>
+                            <div class="inv-summary">
+                                <p>Subtotal: $<span id="inv-subtotal">0.00</span></p>
+                                <p>Tax (18%): $<span id="inv-tax">0.00</span></p>
+                                <h3>Grand Total: $<span id="inv-grand">0.00</span></h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Yotira Data Entry (Ledger) -->
+            <div class="os-window" id="window-ledger">
+                <div class="title-bar"><span>Yotira Ledger</span><button class="close-btn" data-close="ledger"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content ledger-app">
+                    <div class="ledger-header">
+                        <input type="date" id="ledg-date">
+                        <input type="text" id="ledg-desc" placeholder="Description">
+                        <input type="number" id="ledg-amt" placeholder="Amount ($)">
+                        <select id="ledg-cat">
+                            <option value="Income">Income</option>
+                            <option value="Expense">Expense</option>
+                        </select>
+                        <button id="ledg-add-btn" class="sys-btn">Record</button>
+                    </div>
+                    <div class="ledger-actions">
+                        <button id="ledg-export-btn" class="sys-btn" style="background:#17a2b8;"><span class="material-icons-round">file_download</span> Export to CSV</button>
+                    </div>
+                    <div class="ledger-table-container">
+                        <table class="data-table">
+                            <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Amount</th></tr></thead>
+                            <tbody id="ledger-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Yotira Financial Analysis -->
+            <div class="os-window" id="window-finance">
+                <div class="title-bar"><span>Financial Analysis Dashboard</span><button class="close-btn" data-close="finance"><span class="material-icons-round">close</span></button></div>
+                <div class="window-content fin-app">
+                    <div class="fin-upload-area">
+                        <p>Upload a CSV file containing <strong>Revenue</strong> and <strong>Expenses</strong> columns to analyze financial performance.</p>
+                        <input type="file" id="fin-csv-upload" accept=".csv">
+                    </div>
+                    
+                    <div class="fin-metrics" id="fin-metrics" style="display:none;">
+                        <div class="metric-card"><h4>Total Revenue</h4><h2 id="metric-rev" style="color:#28a745;">$0</h2></div>
+                        <div class="metric-card"><h4>Total Expenses</h4><h2 id="metric-exp" style="color:#dc3545;">$0</h2></div>
+                        <div class="metric-card"><h4>Net Profit / Loss</h4><h2 id="metric-net">$0</h2></div>
+                    </div>
+
+                    <div class="fin-charts" id="fin-charts" style="display:none;">
+                        <div class="chart-container"><canvas id="fin-pie-chart"></canvas></div>
+                        <div class="chart-container"><canvas id="fin-bar-chart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Floating Glassmorphism Dock -->
+        <nav id="dock" class="glass-dock">
+            <div class="dock-icon" data-app="notes">
+                <div class="squircle notes-color"><span class="material-icons-round">edit_note</span></div>
+            </div>
+            <div class="dock-icon" data-app="tasks">
+                <div class="squircle tasks-color"><span class="material-icons-round">task_alt</span></div>
+            </div>
+            
+            <!-- REPLACED CHESS with LEDGER in the dock -->
+            <div class="dock-icon" data-app="ledger">
+                <div class="squircle ledger-color"><span class="material-icons-round">account_balance_wallet</span></div>
+            </div>
+            
+            <div class="dock-icon" data-app="sticky">
+                <div class="squircle sticky-color"><span class="material-icons-round">sticky_note_2</span></div>
+            </div>
+            <div class="dock-icon" data-app="ai">
+                <div class="squircle ai-color"><span class="material-icons-round">auto_awesome</span></div>
+            </div>
+        </nav>
+        
+        <!-- Toast Notification -->
+        <div id="toast"></div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
