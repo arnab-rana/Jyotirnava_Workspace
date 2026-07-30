@@ -1,53 +1,36 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    /* =========================================================
-       NEW: TASK 5 - HYBRID DATABASE SYSTEM (Firebase + LocalStorage)
-       ========================================================= */
     class FirebaseManager {
         constructor() {
-            // Placeholder Configuration (Safe to paste actual credentials later)
             this.firebaseConfig = {
-                apiKey: "AIzaSy"+"B28XIuH_hVNBF9-Sp_lCt1QDiOXGELRZY",
+                apiKey: "AIzaSyB28XIuH_hVNBF9-Sp_lCt1QDiOXGELRZY",
                 authDomain: "jyotirnava-os.firebaseapp.com",
                 projectId: "jyotirnava-os",
                 storageBucket: "jyotirnava-os.firebasestorage.app",
                 messagingSenderId: "549324181635",
                 appId: "1:549324181635:web:b6d0bf5d495e835e19cbb6"
-              };              
-            
+              };
             this.db = null;
             this.initFirebase();
         }
-
         initFirebase() {
-            // Only initialize if the user has replaced the dummy key
             if (this.firebaseConfig.apiKey !== "YOUR_API_KEY_HERE" && typeof firebase !== 'undefined') {
-                if (!firebase.apps.length) {
-                    firebase.initializeApp(this.firebaseConfig);
-                }
+                if (!firebase.apps.length) { firebase.initializeApp(this.firebaseConfig); }
                 this.db = firebase.firestore();
                 console.log("Firebase initialized successfully.");
             } else {
                 console.log("Firebase offline: Using LocalStorage fallback only.");
             }
         }
-
-        // Hybrid Save Logic
         hybridSave(collectionName, localKey, dataArray, singleRecord = null) {
-            // 1. Instantly save to local storage
             localStorage.setItem(localKey, JSON.stringify(dataArray));
-            
-            // 2. Simultaneously push to Firebase if online
             if (this.db) {
                 const payload = singleRecord ? singleRecord : { data: dataArray, timestamp: new Date().toISOString() };
-                this.db.collection(collectionName).add(payload)
-                    .then(() => console.log(`${collectionName} synced to cloud.`))
-                    .catch(e => console.warn("Firebase sync failed:", e));
+                this.db.collection(collectionName).add(payload).catch(e => console.warn("Firebase sync failed:", e));
             }
         }
     }
     const dbManager = new FirebaseManager();
-
 
     /* =========================================================
        WINDOW MANAGEMENT SYSTEM
@@ -64,16 +47,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     win.classList.add('active');
                     win.style.zIndex = ++highestZ;
                     
-                    // Render/Refresh fixes for specific apps
                     if(appId === 'maps' && window.yotirnaMap) setTimeout(() => window.yotirnaMap.invalidateSize(), 150);
-                    
-                    // Init Docs on first open to ensure correct container sizing
                     if(appId === 'docs' && !window.yotiraQuillInited) {
                         window.yotiraQuillInited = true;
                         window.quillApp.initEditor();
                     }
-                    
-                    // Init Sheets on first open to avoid 0-width bugs in display:none containers
                     if(appId === 'sheets' && !window.yotiraSheetInited) {
                         window.yotiraSheetInited = true;
                         window.sheetsApp.initSheet();
@@ -81,9 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         } else {
-            icon.addEventListener('click', () => {
-                showToast(`Yotira ${icon.getAttribute('data-name')} is coming in the next update!`);
-            });
+            icon.addEventListener('click', () => { showToast(`Yotira ${icon.getAttribute('data-name')} is coming in the next update!`); });
         }
     });
 
@@ -105,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* =========================================================
-       PREVIOUSLY IMPLEMENTED APPS (Untouched logic except specific mod requests)
+       PRESERVED APPS
        ========================================================= */
     class ClockApp {
         constructor() { this.initTabs(); this.initWorldClock(); this.initStopwatch(); this.initAlarm(); }
@@ -356,78 +332,122 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+
+    /* =========================================================
+       MODIFIED AI SYSTEM (BYOK Implementation)
+       ========================================================= */
+    
     class AiApiManager {
-        constructor() {
-            this.gemP1 = 'GEMINI_PART_1'; this.gemP2 = 'GEMINI_PART_2'; this.gemP3 = 'GEMINI_PART_3';
-            this.geminiKey = this.gemP1 + this.gemP2 + this.gemP3;
-            this.groqP1 = 'GROQ_PART_1'; this.groqP2 = 'GROQ_PART_2'; this.groqP3 = 'GROQ_PART_3';
-            this.groqKey = this.groqP1 + this.groqP2 + this.groqP3;
-            this.orP1 = 'OR_PART_1'; this.orP2 = 'OR_PART_2'; this.orP3 = 'OR_PART_3';
-            this.openRouterKey = this.orP1 + this.orP2 + this.orP3;
-        }
-        async generate(prompt) {
-            try { return await this.fetchGemini(prompt); } catch (e1) {
-                console.warn("Gemini Failed. Falling back to Groq...", e1);
-                try { return await this.fetchGroq(prompt); } catch (e2) {
-                    console.warn("Groq Failed. Falling back to OpenRouter...", e2);
-                    return await this.fetchOpenRouter(prompt);
-                }
-            }
-        }
-        async fetchGemini(prompt) {
-            if (this.geminiKey.includes('PART')) throw new Error("Key not set");
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.geminiKey}`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
+        async generate(prompt, apiKey) {
+            if (!apiKey) throw new Error("API_KEY_MISSING");
+            
+            const res = await fetch(`const apiUrl = https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
             });
-            if(!res.ok) throw new Error("API Error"); const data = await res.json(); return data.candidates[0].content.parts[0].text;
-        }
-        async fetchGroq(prompt) {
-            if (this.groqKey.includes('PART')) throw new Error("Key not set");
-            const res = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
-                method: 'POST', headers: { 'Authorization': `Bearer ${this.groqKey}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model: "llama3-8b-8192", messages: [{role: "user", content: prompt}] })
-            });
-            if(!res.ok) throw new Error("API Error"); const data = await res.json(); return data.choices[0].message.content;
-        }
-        async fetchOpenRouter(prompt) {
-            if (this.openRouterKey.includes('PART')) throw new Error("Key not set");
-            const res = await fetch(`https://openrouter.ai/api/v1/chat/completions`, {
-                method: 'POST', headers: { 'Authorization': `Bearer ${this.openRouterKey}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model: "google/gemini-flash-1.5", messages: [{role: "user", content: prompt}] })
-            });
-            if(!res.ok) throw new Error("API Error"); const data = await res.json(); return data.choices[0].message.content;
+            
+            if(!res.ok) throw new Error("Network Error or Invalid Key"); 
+            const data = await res.json(); 
+            return data.candidates[0].content.parts[0].text;
         }
     }
     const aiCore = new AiApiManager();
 
     class AIApp {
         constructor() {
-            this.input = document.getElementById('ai-input'); this.sendBtn = document.getElementById('ai-send-btn');
-            this.chatBox = document.getElementById('ai-chat-box'); this.bindEvents();
+            this.input = document.getElementById('ai-input');
+            this.sendBtn = document.getElementById('ai-send-btn');
+            this.chatBox = document.getElementById('ai-chat-box');
+            this.resetKeyBtn = document.getElementById('ai-reset-key-btn');
+            this.modal = document.getElementById('api-key-modal');
+            this.keyInput = document.getElementById('api-key-input');
+            this.saveKeyBtn = document.getElementById('api-key-save-btn');
+            this.cancelKeyBtn = document.getElementById('api-key-cancel-btn');
+            
+            this.pendingMessage = "";
+            this.bindEvents();
         }
+
         bindEvents() {
-            this.sendBtn.addEventListener('click', () => this.sendMessage());
-            this.input.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.sendMessage(); });
+            this.sendBtn.addEventListener('click', () => this.handleSendAttempt());
+            this.input.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.handleSendAttempt(); });
+            
+            this.resetKeyBtn.addEventListener('click', () => {
+                localStorage.removeItem('gemini_api_key');
+                showToast("API Key removed from local storage.");
+                this.appendMessage("API Key cleared. You will be prompted for it next time you send a message.", "system");
+            });
+
+            this.saveKeyBtn.addEventListener('click', () => this.saveKeyAndSend());
+            this.cancelKeyBtn.addEventListener('click', () => {
+                this.modal.style.display = 'none';
+                this.pendingMessage = "";
+            });
         }
-        async sendMessage() {
-            const text = this.input.value.trim(); if (!text) return;
-            this.appendMessage(text, 'user'); this.input.value = '';
-            const loadingId = 'loading-' + Date.now();
-            this.appendMessage('Routing query through fallback architecture...', 'loading', loadingId);
-            try {
-                const response = await aiCore.generate(text);
-                this.removeMessage(loadingId); this.appendMessage(response, 'system');
-            } catch (error) {
-                this.removeMessage(loadingId); this.appendMessage("Error: Could not connect to any AI provider.", 'system');
+
+        handleSendAttempt() {
+            const text = this.input.value.trim();
+            if (!text) return;
+
+            const apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) {
+                this.pendingMessage = text;
+                this.modal.style.display = 'flex';
+                this.keyInput.value = '';
+                this.keyInput.focus();
+            } else {
+                this.sendMessage(text, apiKey);
+                this.input.value = '';
             }
         }
-        appendMessage(text, type, id = null) {
-            const msgDiv = document.createElement('div'); msgDiv.className = `ai-msg ai-${type}`;
-            if (id) msgDiv.id = id; msgDiv.textContent = text;
-            this.chatBox.appendChild(msgDiv); this.chatBox.scrollTop = this.chatBox.scrollHeight;
+
+        saveKeyAndSend() {
+            const key = this.keyInput.value.trim();
+            if (!key) return alert("Please enter a valid API key.");
+            
+            localStorage.setItem('gemini_api_key', key);
+            this.modal.style.display = 'none';
+            
+            if (this.pendingMessage) {
+                this.sendMessage(this.pendingMessage, key);
+                this.input.value = '';
+                this.pendingMessage = "";
+            }
         }
-        removeMessage(id) { const msgDiv = document.getElementById(id); if (msgDiv) msgDiv.remove(); }
+
+        async sendMessage(text, apiKey) {
+            this.appendMessage(text, 'user');
+            const loadingId = 'loading-' + Date.now();
+            this.appendMessage('Yotira AI is thinking...', 'loading', loadingId);
+            
+            try {
+                const response = await aiCore.generate(text, apiKey);
+                this.removeMessage(loadingId);
+                this.appendMessage(response, 'system');
+            } catch (error) {
+                this.removeMessage(loadingId);
+                if (error.message === "API_KEY_MISSING") {
+                    this.appendMessage("Error: API Key is missing.", 'system');
+                } else {
+                    this.appendMessage("Error: Could not connect or invalid API key. Please try resetting your key.", 'system');
+                }
+            }
+        }
+
+        appendMessage(text, type, id = null) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `ai-msg ai-${type}`;
+            if (id) msgDiv.id = id;
+            msgDiv.textContent = text;
+            this.chatBox.appendChild(msgDiv);
+            this.chatBox.scrollTop = this.chatBox.scrollHeight;
+        }
+
+        removeMessage(id) {
+            const msgDiv = document.getElementById(id);
+            if (msgDiv) msgDiv.remove();
+        }
     }
 
     class ATSApp {
@@ -440,6 +460,14 @@ document.addEventListener("DOMContentLoaded", () => {
         bindEvents() { this.analyzeBtn.addEventListener('click', () => this.processResume()); }
         async processResume() {
             if(this.fileInput.files.length === 0) return alert("Please select a PDF file first.");
+            
+            let apiKey = localStorage.getItem('gemini_api_key');
+            if (!apiKey) {
+                apiKey = prompt("Please enter your Gemini API Key to use the ATS Analyzer:");
+                if(!apiKey) return;
+                localStorage.setItem('gemini_api_key', apiKey);
+            }
+
             this.resultsDiv.innerHTML = ''; this.loadingDiv.style.display = 'block';
             try {
                 const file = this.fileInput.files[0]; const arrayBuffer = await file.arrayBuffer();
@@ -450,13 +478,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     fullText += content.items.map(item => item.str).join(" ") + " ";
                 }
                 if(fullText.trim().length < 50) throw new Error("Could not extract enough text from the PDF.");
-                const prompt = `You are an expert ATS System. Analyze the following resume text. Return ONLY a valid JSON object with exactly two keys: "review" (a 3-sentence summary of candidate strengths) and "job_titles" (an array of exactly 3 strings representing the most suitable job titles for this candidate). Do not include markdown formatting. Resume Text: ${fullText.substring(0, 4000)}`;
-                let rawResponse = await aiCore.generate(prompt);
+                
+                const promptString = `You are an expert ATS System. Analyze the following resume text. Return ONLY a valid JSON object with exactly two keys: "review" (a 3-sentence summary of candidate strengths) and "job_titles" (an array of exactly 3 strings representing the most suitable job titles for this candidate). Do not include markdown formatting. Resume Text: ${fullText.substring(0, 4000)}`;
+                
+                let rawResponse = await aiCore.generate(promptString, apiKey);
                 rawResponse = rawResponse.replace(/```json/g, '').replace(/```/g, '').trim();
                 const resultData = JSON.parse(rawResponse);
                 this.renderResults(resultData);
             } catch (err) {
-                this.resultsDiv.innerHTML = `<p style="color:red; text-align:center;">Failed to analyze resume.</p>`;
+                this.resultsDiv.innerHTML = `<p style="color:red; text-align:center;">Failed to analyze resume. Check your API key or PDF format.</p>`;
             } finally { this.loadingDiv.style.display = 'none'; }
         }
         renderResults(data) {
@@ -464,6 +494,11 @@ document.addEventListener("DOMContentLoaded", () => {
             this.resultsDiv.innerHTML = `<div class="ats-review-card"><h3>Candidate Evaluation</h3><p style="color:#444; line-height:1.6; margin-bottom: 20px;">${data.review}</p><h4 style="margin-bottom:10px; color:#333;">Recommended Job Searches</h4><div style="display:flex; flex-wrap:wrap;">${linksHTML}</div></div>`;
         }
     }
+
+
+    /* =========================================================
+       REMAINING PRESERVED APPS
+       ========================================================= */
 
     class FlowApp {
         constructor() {
@@ -672,6 +707,68 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    class PollApp {
+        constructor() {
+            this.polls = JSON.parse(localStorage.getItem('yotiraPolls')) || []; 
+            this.initTabs(); this.bindCreateEvents(); this.renderPolls();
+        }
+        initTabs() {
+            const tabs = document.querySelectorAll('.poll-tab-btn');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active')); document.querySelectorAll('#window-poll .tab-content').forEach(c => c.classList.remove('active'));
+                    tab.classList.add('active'); document.getElementById(`poll-tab-${tab.getAttribute('data-tab')}`).classList.add('active');
+                });
+            });
+        }
+        bindCreateEvents() {
+            document.getElementById('poll-create-btn').addEventListener('click', () => {
+                const q = document.getElementById('poll-q').value.trim(); const optInputs = document.querySelectorAll('.poll-opt'); const options = [];
+                optInputs.forEach(input => { if(input.value.trim()) options.push({ text: input.value.trim(), votes: 0 }); });
+                if(!q || options.length < 2) { alert("Please provide a question and at least 2 options."); return; }
+                this.polls.unshift({ id: Date.now(), question: q, options: options });
+                localStorage.setItem('yotiraPolls', JSON.stringify(this.polls));
+                document.getElementById('poll-q').value = ''; optInputs.forEach(input => input.value = '');
+                showToast("Poll Created!"); this.renderPolls(); document.querySelector('.poll-tab-btn[data-tab="active"]').click();
+            });
+        }
+        vote(pollId, optionIndex) {
+            const poll = this.polls.find(p => p.id === pollId);
+            if(poll) { poll.options[optionIndex].votes += 1; localStorage.setItem('yotiraPolls', JSON.stringify(this.polls)); this.renderPolls(); }
+        }
+        renderPolls() {
+            const container = document.getElementById('poll-list-container'); container.innerHTML = '';
+            if(this.polls.length === 0) { container.innerHTML = '<p style="color:#888; text-align:center;">No active polls.</p>'; return; }
+            this.polls.forEach(poll => {
+                let totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+                let optionsHTML = poll.options.map((opt, idx) => {
+                    let percent = totalVotes === 0 ? 0 : Math.round((opt.votes / totalVotes) * 100);
+                    return `<div class="poll-option-btn" data-poll-id="${poll.id}" data-opt-idx="${idx}"><div class="poll-bar" style="width: ${percent}%"></div><div class="poll-opt-text"><span>${opt.text}</span><span>${percent}% (${opt.votes})</span></div></div>`;
+                }).join('');
+                
+                const card = document.createElement('div'); card.className = 'poll-card';
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3>${poll.question}</h3>
+                        <button class="poll-del-btn" data-id="${poll.id}" style="background:none; border:none; color:#dc3545; cursor:pointer;"><span class="material-icons-round">delete</span></button>
+                    </div>
+                    ${optionsHTML}
+                `;
+                
+                card.querySelector('.poll-del-btn').addEventListener('click', () => {
+                    this.polls = this.polls.filter(p => p.id !== poll.id);
+                    localStorage.setItem('yotiraPolls', JSON.stringify(this.polls));
+                    this.renderPolls();
+                });
+
+                card.querySelectorAll('.poll-option-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => { this.vote(parseInt(e.currentTarget.getAttribute('data-poll-id')), parseInt(e.currentTarget.getAttribute('data-opt-idx'))); });
+                });
+                container.appendChild(card);
+            });
+        }
+    }
+
     class SmartCabinApp {
         constructor() {
             this.dot = document.getElementById('cabin-dot'); this.text = document.getElementById('cabin-text'); this.subtext = document.getElementById('cabin-subtext');
@@ -735,12 +832,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-
-    /* =========================================================
-       MODIFIED APPS (Task 2 & Task 5 Additions)
-       ========================================================= */
-
-    // Ledger App MODIFIED: Added Delete Functionality (Task 2)
     class LedgerApp {
         constructor() {
             this.entries = JSON.parse(localStorage.getItem('yotiraLedger')) || [];
@@ -818,70 +909,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Poll System MODIFIED: Added Delete Functionality (Task 2)
-    class PollApp {
-        constructor() {
-            this.polls = JSON.parse(localStorage.getItem('yotiraPolls')) || []; 
-            this.initTabs(); this.bindCreateEvents(); this.renderPolls();
-        }
-        initTabs() {
-            const tabs = document.querySelectorAll('.poll-tab-btn');
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    tabs.forEach(t => t.classList.remove('active')); document.querySelectorAll('#window-poll .tab-content').forEach(c => c.classList.remove('active'));
-                    tab.classList.add('active'); document.getElementById(`poll-tab-${tab.getAttribute('data-tab')}`).classList.add('active');
-                });
-            });
-        }
-        bindCreateEvents() {
-            document.getElementById('poll-create-btn').addEventListener('click', () => {
-                const q = document.getElementById('poll-q').value.trim(); const optInputs = document.querySelectorAll('.poll-opt'); const options = [];
-                optInputs.forEach(input => { if(input.value.trim()) options.push({ text: input.value.trim(), votes: 0 }); });
-                if(!q || options.length < 2) { alert("Please provide a question and at least 2 options."); return; }
-                this.polls.unshift({ id: Date.now(), question: q, options: options });
-                localStorage.setItem('yotiraPolls', JSON.stringify(this.polls));
-                document.getElementById('poll-q').value = ''; optInputs.forEach(input => input.value = '');
-                showToast("Poll Created!"); this.renderPolls(); document.querySelector('.poll-tab-btn[data-tab="active"]').click();
-            });
-        }
-        vote(pollId, optionIndex) {
-            const poll = this.polls.find(p => p.id === pollId);
-            if(poll) { poll.options[optionIndex].votes += 1; localStorage.setItem('yotiraPolls', JSON.stringify(this.polls)); this.renderPolls(); }
-        }
-        renderPolls() {
-            const container = document.getElementById('poll-list-container'); container.innerHTML = '';
-            if(this.polls.length === 0) { container.innerHTML = '<p style="color:#888; text-align:center;">No active polls.</p>'; return; }
-            this.polls.forEach(poll => {
-                let totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
-                let optionsHTML = poll.options.map((opt, idx) => {
-                    let percent = totalVotes === 0 ? 0 : Math.round((opt.votes / totalVotes) * 100);
-                    return `<div class="poll-option-btn" data-poll-id="${poll.id}" data-opt-idx="${idx}"><div class="poll-bar" style="width: ${percent}%"></div><div class="poll-opt-text"><span>${opt.text}</span><span>${percent}% (${opt.votes})</span></div></div>`;
-                }).join('');
-                
-                const card = document.createElement('div'); card.className = 'poll-card';
-                card.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h3>${poll.question}</h3>
-                        <button class="poll-del-btn" data-id="${poll.id}" style="background:none; border:none; color:#dc3545; cursor:pointer;"><span class="material-icons-round">delete</span></button>
-                    </div>
-                    ${optionsHTML}
-                `;
-                
-                card.querySelector('.poll-del-btn').addEventListener('click', () => {
-                    this.polls = this.polls.filter(p => p.id !== poll.id);
-                    localStorage.setItem('yotiraPolls', JSON.stringify(this.polls));
-                    this.renderPolls();
-                });
-
-                card.querySelectorAll('.poll-option-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => { this.vote(parseInt(e.currentTarget.getAttribute('data-poll-id')), parseInt(e.currentTarget.getAttribute('data-opt-idx'))); });
-                });
-                container.appendChild(card);
-            });
-        }
-    }
-
-    // Finance App MODIFIED: Added Hybrid DB Sync (Task 5)
     class FinanceApp {
         constructor() {
             this.uploadInput = document.getElementById('fin-csv-upload');
@@ -946,11 +973,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-
-    /* =========================================================
-       NEW APPENDED APPS (Task 3 & 4: Contacts, Docs, Sheets)
-       ========================================================= */
-
     class ContactsApp {
         constructor() {
             this.contacts = JSON.parse(localStorage.getItem('yotiraContacts')) || [];
@@ -977,7 +999,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const newContact = { id: Date.now(), name, phone, email };
             this.contacts.unshift(newContact);
             
-            // HYBRID DB SYNC (Task 5)
             dbManager.hybridSave('Contacts', 'yotiraContacts', this.contacts, newContact);
             
             this.nameInput.value = ''; this.phoneInput.value = ''; this.emailInput.value = '';
@@ -1034,7 +1055,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 if(!this.quill) return;
                 const docData = { title: this.titleInput.value.trim() || 'Untitled', content: this.quill.getContents(), timestamp: new Date().toISOString() };
                 
-                // HYBRID DB SYNC (Task 5)
                 dbManager.hybridSave('Documents', 'yotiraDocs_Draft', docData, docData);
                 showToast('Document Synced to Cloud!');
             });
@@ -1072,15 +1092,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 if(!this.sheet) return;
                 const sheetData = { data: this.sheet.getData(), timestamp: new Date().toISOString() };
                 
-                // HYBRID DB SYNC (Task 5)
                 dbManager.hybridSave('Spreadsheets', 'yotiraSheets_Draft', sheetData, sheetData);
                 showToast('Spreadsheet Synced to Cloud!');
             });
         }
     }
 
-
-    // Initialize All Preserved Apps
+    // Initialize All Apps
     new ClockApp();
     new NotesApp();
     new NewsApp();
@@ -1097,17 +1115,14 @@ document.addEventListener("DOMContentLoaded", () => {
     new WhiteboardApp();
     new AnnouncementApp();
     new ConferenceApp();
-    
-    // Initialize Modded Financial Apps
     new PollApp();
     new SmartCabinApp();
     new InvoiceApp();
     new LedgerApp();
     new FinanceApp();
-
-    // Initialize New Appended Apps (Task 3 & 4)
     new ContactsApp();
-    window.quillApp = new DocsApp(); // Expose for Window Manager Initialization
-    window.sheetsApp = new SheetsApp(); // Expose for Window Manager Initialization
+    
+    window.quillApp = new DocsApp(); 
+    window.sheetsApp = new SheetsApp();
 
 });
