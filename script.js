@@ -332,24 +332,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-
     /* =========================================================
-       MODIFIED AI SYSTEM (BYOK Implementation)
+       MODIFIED AI SYSTEM (Keyless Pollinations Implementation)
        ========================================================= */
     
-    class AiApiManager {
-        async generate(prompt, apiKey) {
-            if (!apiKey) throw new Error("API_KEY_MISSING");
+       class AiApiManager {
+        // Kept intact so ATS Resume Analyzer doesn't break, but rerouted to Pollinations
+        async generate(prompt) {
+            const encodedMessage = encodeURIComponent(prompt);
+            const apiUrl = 'https://text.pollinations.ai/' + encodedMessage;
             
-            const res = await fetch(`const apiUrl = https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-            
-            if(!res.ok) throw new Error("Network Error or Invalid Key"); 
-            const data = await res.json(); 
-            return data.candidates[0].content.parts[0].text;
+            const res = await fetch(apiUrl);
+            if(!res.ok) throw new Error("Network Error"); 
+            return await res.text();
         }
     }
     const aiCore = new AiApiManager();
@@ -360,78 +355,45 @@ document.addEventListener("DOMContentLoaded", () => {
             this.sendBtn = document.getElementById('ai-send-btn');
             this.chatBox = document.getElementById('ai-chat-box');
             this.resetKeyBtn = document.getElementById('ai-reset-key-btn');
-            this.modal = document.getElementById('api-key-modal');
-            this.keyInput = document.getElementById('api-key-input');
-            this.saveKeyBtn = document.getElementById('api-key-save-btn');
-            this.cancelKeyBtn = document.getElementById('api-key-cancel-btn');
             
-            this.pendingMessage = "";
             this.bindEvents();
         }
 
         bindEvents() {
-            this.sendBtn.addEventListener('click', () => this.handleSendAttempt());
-            this.input.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.handleSendAttempt(); });
+            this.sendBtn.addEventListener('click', () => this.sendMessage());
+            this.input.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.sendMessage(); });
             
-            this.resetKeyBtn.addEventListener('click', () => {
-                localStorage.removeItem('gemini_api_key');
-                showToast("API Key removed from local storage.");
-                this.appendMessage("API Key cleared. You will be prompted for it next time you send a message.", "system");
-            });
-
-            this.saveKeyBtn.addEventListener('click', () => this.saveKeyAndSend());
-            this.cancelKeyBtn.addEventListener('click', () => {
-                this.modal.style.display = 'none';
-                this.pendingMessage = "";
-            });
-        }
-
-        handleSendAttempt() {
-            const text = this.input.value.trim();
-            if (!text) return;
-
-            const apiKey = localStorage.getItem('gemini_api_key');
-            if (!apiKey) {
-                this.pendingMessage = text;
-                this.modal.style.display = 'flex';
-                this.keyInput.value = '';
-                this.keyInput.focus();
-            } else {
-                this.sendMessage(text, apiKey);
-                this.input.value = '';
+            // Hide the obsolete BYOK reset button if it exists in the HTML
+            if (this.resetKeyBtn) {
+                this.resetKeyBtn.style.display = 'none';
             }
         }
 
-        saveKeyAndSend() {
-            const key = this.keyInput.value.trim();
-            if (!key) return alert("Please enter a valid API key.");
+        async sendMessage() {
+            const userMessage = this.input.value.trim();
+            if (!userMessage) return;
             
-            localStorage.setItem('gemini_api_key', key);
-            this.modal.style.display = 'none';
+            this.input.value = '';
+            this.appendMessage(userMessage, 'user');
             
-            if (this.pendingMessage) {
-                this.sendMessage(this.pendingMessage, key);
-                this.input.value = '';
-                this.pendingMessage = "";
-            }
-        }
-
-        async sendMessage(text, apiKey) {
-            this.appendMessage(text, 'user');
             const loadingId = 'loading-' + Date.now();
             this.appendMessage('Yotira AI is thinking...', 'loading', loadingId);
             
             try {
-                const response = await aiCore.generate(text, apiKey);
+                // Completely free, keyless pipeline
+                const encodedMessage = encodeURIComponent(userMessage);
+                const apiUrl = 'https://text.pollinations.ai/' + encodedMessage;
+                
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error("Network response was not ok");
+                
+                const responseText = await response.text();
+                
                 this.removeMessage(loadingId);
-                this.appendMessage(response, 'system');
+                this.appendMessage(responseText, 'system');
             } catch (error) {
                 this.removeMessage(loadingId);
-                if (error.message === "API_KEY_MISSING") {
-                    this.appendMessage("Error: API Key is missing.", 'system');
-                } else {
-                    this.appendMessage("Error: Could not connect or invalid API key. Please try resetting your key.", 'system');
-                }
+                this.appendMessage("Error: Could not connect to the Pollinations AI pipeline.", 'system');
             }
         }
 
@@ -449,7 +411,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (msgDiv) msgDiv.remove();
         }
     }
-
     class ATSApp {
         constructor() {
             this.fileInput = document.getElementById('resume-upload'); this.analyzeBtn = document.getElementById('analyze-resume-btn');
