@@ -1,6 +1,55 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     /* =========================================================
+       NEW: TASK 5 - HYBRID DATABASE SYSTEM (Firebase + LocalStorage)
+       ========================================================= */
+    class FirebaseManager {
+        constructor() {
+            // Placeholder Configuration (Safe to paste actual credentials later)
+            this.firebaseConfig = {
+                apiKey: "AIzaSyB28XIuH_hVNBF9-Sp_lCt1QDiOXGELRZY",
+                authDomain: "jyotirnava-os.firebaseapp.com",
+                projectId: "jyotirnava-os",
+                storageBucket: "jyotirnava-os.firebasestorage.app",
+                messagingSenderId: "549324181635",
+                appId: "1:549324181635:web:b6d0bf5d495e835e19cbb6"
+              };              
+            
+            this.db = null;
+            this.initFirebase();
+        }
+
+        initFirebase() {
+            // Only initialize if the user has replaced the dummy key
+            if (this.firebaseConfig.apiKey !== "YOUR_API_KEY_HERE" && typeof firebase !== 'undefined') {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(this.firebaseConfig);
+                }
+                this.db = firebase.firestore();
+                console.log("Firebase initialized successfully.");
+            } else {
+                console.log("Firebase offline: Using LocalStorage fallback only.");
+            }
+        }
+
+        // Hybrid Save Logic
+        hybridSave(collectionName, localKey, dataArray, singleRecord = null) {
+            // 1. Instantly save to local storage
+            localStorage.setItem(localKey, JSON.stringify(dataArray));
+            
+            // 2. Simultaneously push to Firebase if online
+            if (this.db) {
+                const payload = singleRecord ? singleRecord : { data: dataArray, timestamp: new Date().toISOString() };
+                this.db.collection(collectionName).add(payload)
+                    .then(() => console.log(`${collectionName} synced to cloud.`))
+                    .catch(e => console.warn("Firebase sync failed:", e));
+            }
+        }
+    }
+    const dbManager = new FirebaseManager();
+
+
+    /* =========================================================
        WINDOW MANAGEMENT SYSTEM
        ========================================================= */
     let highestZ = 1000;
@@ -14,7 +63,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 if(win) {
                     win.classList.add('active');
                     win.style.zIndex = ++highestZ;
+                    
+                    // Render/Refresh fixes for specific apps
                     if(appId === 'maps' && window.yotirnaMap) setTimeout(() => window.yotirnaMap.invalidateSize(), 150);
+                    
+                    // Init Docs on first open to ensure correct container sizing
+                    if(appId === 'docs' && !window.yotiraQuillInited) {
+                        window.yotiraQuillInited = true;
+                        window.quillApp.initEditor();
+                    }
+                    
+                    // Init Sheets on first open to avoid 0-width bugs in display:none containers
+                    if(appId === 'sheets' && !window.yotiraSheetInited) {
+                        window.yotiraSheetInited = true;
+                        window.sheetsApp.initSheet();
+                    }
                 }
             });
         } else {
@@ -42,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* =========================================================
-       PREVIOUSLY IMPLEMENTED APPS (Untouched logic)
+       PREVIOUSLY IMPLEMENTED APPS (Untouched logic except specific mod requests)
        ========================================================= */
     class ClockApp {
         constructor() { this.initTabs(); this.initWorldClock(); this.initStopwatch(); this.initAlarm(); }
@@ -609,9 +672,157 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    class SmartCabinApp {
+        constructor() {
+            this.dot = document.getElementById('cabin-dot'); this.text = document.getElementById('cabin-text'); this.subtext = document.getElementById('cabin-subtext');
+            this.knockBtn = document.getElementById('cabin-knock-btn'); this.modal = document.getElementById('cabin-modal');
+            this.currentStatus = localStorage.getItem('yotiraCabinStatus') || 'free';
+            this.bindEvents(); this.updateDashboard();
+        }
+        bindEvents() {
+            this.knockBtn.addEventListener('click', () => { this.modal.style.display = 'flex'; document.getElementById('window-cabin').style.zIndex = ++highestZ; });
+            document.querySelectorAll('.cabin-res-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    this.currentStatus = e.target.getAttribute('data-status'); localStorage.setItem('yotiraCabinStatus', this.currentStatus);
+                    this.modal.style.display = 'none'; this.updateDashboard();
+                });
+            });
+        }
+        updateDashboard() {
+            if(this.currentStatus === 'free') { this.dot.style.color = '#28a745'; this.text.textContent = "FREE"; this.subtext.textContent = "Please Come In"; } 
+            else if (this.currentStatus === 'meeting') { this.dot.style.color = '#f39c12'; this.text.textContent = "IN MEETING"; this.subtext.textContent = "Please wait outside (10 mins)"; } 
+            else if (this.currentStatus === 'dnd') { this.dot.style.color = '#e74c3c'; this.text.textContent = "DO NOT DISTURB"; this.subtext.textContent = "Busy for the rest of the day"; }
+        }
+    }
+
+    class InvoiceApp {
+        constructor() {
+            this.items = [];
+            this.clientInput = document.getElementById('inv-client'); this.dateInput = document.getElementById('inv-date');
+            this.descInput = document.getElementById('inv-item-desc'); this.qtyInput = document.getElementById('inv-item-qty');
+            this.priceInput = document.getElementById('inv-item-price'); this.tbody = document.getElementById('inv-table-body');
+            this.dispClient = document.getElementById('disp-client'); this.dispDate = document.getElementById('disp-date');
+            this.subtotalEl = document.getElementById('inv-subtotal'); this.taxEl = document.getElementById('inv-tax'); this.grandEl = document.getElementById('inv-grand');
+            this.bindEvents();
+        }
+        bindEvents() {
+            document.getElementById('add-inv-item-btn').addEventListener('click', () => this.addItem());
+            document.getElementById('download-inv-btn').addEventListener('click', () => this.downloadPDF());
+            this.clientInput.addEventListener('input', (e) => { this.dispClient.textContent = e.target.value || 'Client Name'; });
+            this.dateInput.addEventListener('change', (e) => { this.dispDate.textContent = e.target.value || 'MM/DD/YYYY'; });
+        }
+        addItem() {
+            const desc = this.descInput.value.trim(); const qty = parseInt(this.qtyInput.value) || 0; const price = parseFloat(this.priceInput.value) || 0;
+            if(!desc || qty <= 0 || price < 0) return alert("Please enter valid item details.");
+            this.items.push({ desc, qty, price, total: qty * price });
+            this.descInput.value = ''; this.qtyInput.value = '1'; this.priceInput.value = ''; this.render();
+        }
+        render() {
+            this.tbody.innerHTML = ''; let subtotal = 0;
+            this.items.forEach(item => {
+                subtotal += item.total;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${item.desc}</td><td>${item.qty}</td><td>$${item.price.toFixed(2)}</td><td>$${item.total.toFixed(2)}</td>`;
+                this.tbody.appendChild(tr);
+            });
+            const tax = subtotal * 0.18; const grand = subtotal + tax;
+            this.subtotalEl.textContent = subtotal.toFixed(2); this.taxEl.textContent = tax.toFixed(2); this.grandEl.textContent = grand.toFixed(2);
+        }
+        downloadPDF() {
+            const element = document.getElementById('invoice-print-area');
+            const opt = { margin: 10, filename: `Invoice_${this.clientInput.value || 'Draft'}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+            html2pdf().set(opt).from(element).save();
+        }
+    }
+
+
+    /* =========================================================
+       MODIFIED APPS (Task 2 & Task 5 Additions)
+       ========================================================= */
+
+    // Ledger App MODIFIED: Added Delete Functionality (Task 2)
+    class LedgerApp {
+        constructor() {
+            this.entries = JSON.parse(localStorage.getItem('yotiraLedger')) || [];
+            this.dateInput = document.getElementById('ledg-date');
+            this.descInput = document.getElementById('ledg-desc');
+            this.amtInput = document.getElementById('ledg-amt');
+            this.catInput = document.getElementById('ledg-cat');
+            this.tbody = document.getElementById('ledger-tbody');
+            this.balanceEl = document.getElementById('ledg-balance');
+            
+            this.bindEvents();
+            this.render();
+        }
+
+        bindEvents() {
+            document.getElementById('ledg-add-btn').addEventListener('click', () => this.addEntry());
+            document.getElementById('ledg-export-btn').addEventListener('click', () => this.exportCSV());
+        }
+
+        addEntry() {
+            const date = this.dateInput.value;
+            const desc = this.descInput.value.trim();
+            const amt = parseFloat(this.amtInput.value);
+            const cat = this.catInput.value;
+
+            if(!date || !desc || isNaN(amt)) return alert("Please fill all fields correctly.");
+
+            this.entries.unshift({ id: Date.now(), date, desc, amt, cat });
+            localStorage.setItem('yotiraLedger', JSON.stringify(this.entries));
+            
+            this.descInput.value = ''; this.amtInput.value = '';
+            this.render();
+        }
+
+        render() {
+            this.tbody.innerHTML = '';
+            let totalBalance = 0;
+
+            this.entries.forEach(e => {
+                totalBalance += (e.cat === 'Income' ? e.amt : -e.amt);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${e.date}</td>
+                    <td>${e.desc}</td>
+                    <td class="cat-${e.cat}">${e.cat}</td>
+                    <td>$${e.amt.toFixed(2)}</td>
+                    <td style="text-align:right;">
+                        <button class="ledg-del-btn" data-id="${e.id}" style="background:none; border:none; color:#dc3545; cursor:pointer;">
+                            <span class="material-icons-round" style="font-size:20px;">delete</span>
+                        </button>
+                    </td>
+                `;
+                
+                tr.querySelector('.ledg-del-btn').addEventListener('click', () => {
+                    this.entries = this.entries.filter(entry => entry.id !== e.id);
+                    localStorage.setItem('yotiraLedger', JSON.stringify(this.entries));
+                    this.render();
+                });
+
+                this.tbody.appendChild(tr);
+            });
+
+            this.balanceEl.textContent = `Total Balance: $${totalBalance.toFixed(2)}`;
+            this.balanceEl.style.color = totalBalance >= 0 ? '#28a745' : '#dc3545';
+        }
+
+        exportCSV() {
+            if(this.entries.length === 0) return alert("No data to export.");
+            let csvContent = "Date,Description,Category,Amount\n";
+            this.entries.forEach(e => { csvContent += `${e.date},"${e.desc}",${e.cat},${e.amt}\n`; });
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a"); link.setAttribute("href", url); link.setAttribute("download", "Yotira_Ledger.csv");
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+    }
+
+    // Poll System MODIFIED: Added Delete Functionality (Task 2)
     class PollApp {
         constructor() {
-            this.polls = JSON.parse(localStorage.getItem('yotiraPolls')) || []; this.initTabs(); this.bindCreateEvents(); this.renderPolls();
+            this.polls = JSON.parse(localStorage.getItem('yotiraPolls')) || []; 
+            this.initTabs(); this.bindCreateEvents(); this.renderPolls();
         }
         initTabs() {
             const tabs = document.querySelectorAll('.poll-tab-btn');
@@ -646,7 +857,22 @@ document.addEventListener("DOMContentLoaded", () => {
                     let percent = totalVotes === 0 ? 0 : Math.round((opt.votes / totalVotes) * 100);
                     return `<div class="poll-option-btn" data-poll-id="${poll.id}" data-opt-idx="${idx}"><div class="poll-bar" style="width: ${percent}%"></div><div class="poll-opt-text"><span>${opt.text}</span><span>${percent}% (${opt.votes})</span></div></div>`;
                 }).join('');
-                const card = document.createElement('div'); card.className = 'poll-card'; card.innerHTML = `<h3>${poll.question}</h3>${optionsHTML}`;
+                
+                const card = document.createElement('div'); card.className = 'poll-card';
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3>${poll.question}</h3>
+                        <button class="poll-del-btn" data-id="${poll.id}" style="background:none; border:none; color:#dc3545; cursor:pointer;"><span class="material-icons-round">delete</span></button>
+                    </div>
+                    ${optionsHTML}
+                `;
+                
+                card.querySelector('.poll-del-btn').addEventListener('click', () => {
+                    this.polls = this.polls.filter(p => p.id !== poll.id);
+                    localStorage.setItem('yotiraPolls', JSON.stringify(this.polls));
+                    this.renderPolls();
+                });
+
                 card.querySelectorAll('.poll-option-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => { this.vote(parseInt(e.currentTarget.getAttribute('data-poll-id')), parseInt(e.currentTarget.getAttribute('data-opt-idx'))); });
                 });
@@ -655,269 +881,200 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    class SmartCabinApp {
-        constructor() {
-            this.dot = document.getElementById('cabin-dot'); this.text = document.getElementById('cabin-text'); this.subtext = document.getElementById('cabin-subtext');
-            this.knockBtn = document.getElementById('cabin-knock-btn'); this.modal = document.getElementById('cabin-modal');
-            this.currentStatus = localStorage.getItem('yotiraCabinStatus') || 'free';
-            this.bindEvents(); this.updateDashboard();
-        }
-        bindEvents() {
-            this.knockBtn.addEventListener('click', () => { this.modal.style.display = 'flex'; document.getElementById('window-cabin').style.zIndex = ++highestZ; });
-            document.querySelectorAll('.cabin-res-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    this.currentStatus = e.target.getAttribute('data-status'); localStorage.setItem('yotiraCabinStatus', this.currentStatus);
-                    this.modal.style.display = 'none'; this.updateDashboard();
-                });
-            });
-        }
-        updateDashboard() {
-            if(this.currentStatus === 'free') { this.dot.style.color = '#28a745'; this.text.textContent = "FREE"; this.subtext.textContent = "Please Come In"; } 
-            else if (this.currentStatus === 'meeting') { this.dot.style.color = '#f39c12'; this.text.textContent = "IN MEETING"; this.subtext.textContent = "Please wait outside (10 mins)"; } 
-            else if (this.currentStatus === 'dnd') { this.dot.style.color = '#e74c3c'; this.text.textContent = "DO NOT DISTURB"; this.subtext.textContent = "Busy for the rest of the day"; }
-        }
-    }
-
-
-    /* =========================================================
-       NEW APPENDED APPS (Financial / ERP)
-       ========================================================= */
-
-    // 1. Yotira Invoice Generator
-    class InvoiceApp {
-        constructor() {
-            this.items = [];
-            this.clientInput = document.getElementById('inv-client');
-            this.dateInput = document.getElementById('inv-date');
-            this.descInput = document.getElementById('inv-item-desc');
-            this.qtyInput = document.getElementById('inv-item-qty');
-            this.priceInput = document.getElementById('inv-item-price');
-            this.tbody = document.getElementById('inv-table-body');
-            
-            this.dispClient = document.getElementById('disp-client');
-            this.dispDate = document.getElementById('disp-date');
-            this.subtotalEl = document.getElementById('inv-subtotal');
-            this.taxEl = document.getElementById('inv-tax');
-            this.grandEl = document.getElementById('inv-grand');
-
-            this.bindEvents();
-        }
-
-        bindEvents() {
-            document.getElementById('add-inv-item-btn').addEventListener('click', () => this.addItem());
-            document.getElementById('download-inv-btn').addEventListener('click', () => this.downloadPDF());
-            
-            this.clientInput.addEventListener('input', (e) => { this.dispClient.textContent = e.target.value || 'Client Name'; });
-            this.dateInput.addEventListener('change', (e) => { this.dispDate.textContent = e.target.value || 'MM/DD/YYYY'; });
-        }
-
-        addItem() {
-            const desc = this.descInput.value.trim();
-            const qty = parseInt(this.qtyInput.value) || 0;
-            const price = parseFloat(this.priceInput.value) || 0;
-
-            if(!desc || qty <= 0 || price < 0) return alert("Please enter valid item details.");
-
-            this.items.push({ desc, qty, price, total: qty * price });
-            this.descInput.value = ''; this.qtyInput.value = '1'; this.priceInput.value = '';
-            
-            this.render();
-        }
-
-        render() {
-            this.tbody.innerHTML = '';
-            let subtotal = 0;
-
-            this.items.forEach(item => {
-                subtotal += item.total;
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${item.desc}</td><td>${item.qty}</td><td>$${item.price.toFixed(2)}</td><td>$${item.total.toFixed(2)}</td>`;
-                this.tbody.appendChild(tr);
-            });
-
-            const tax = subtotal * 0.18;
-            const grand = subtotal + tax;
-
-            this.subtotalEl.textContent = subtotal.toFixed(2);
-            this.taxEl.textContent = tax.toFixed(2);
-            this.grandEl.textContent = grand.toFixed(2);
-        }
-
-        downloadPDF() {
-            const element = document.getElementById('invoice-print-area');
-            const opt = {
-                margin:       10,
-                filename:     `Invoice_${this.clientInput.value || 'Draft'}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(element).save();
-        }
-    }
-
-    // 2. Yotira Data Entry (Ledger)
-    class LedgerApp {
-        constructor() {
-            this.entries = JSON.parse(localStorage.getItem('yotiraLedger')) || [];
-            this.dateInput = document.getElementById('ledg-date');
-            this.descInput = document.getElementById('ledg-desc');
-            this.amtInput = document.getElementById('ledg-amt');
-            this.catInput = document.getElementById('ledg-cat');
-            this.tbody = document.getElementById('ledger-tbody');
-            
-            this.bindEvents();
-            this.render();
-        }
-
-        bindEvents() {
-            document.getElementById('ledg-add-btn').addEventListener('click', () => this.addEntry());
-            document.getElementById('ledg-export-btn').addEventListener('click', () => this.exportCSV());
-        }
-
-        addEntry() {
-            const date = this.dateInput.value;
-            const desc = this.descInput.value.trim();
-            const amt = parseFloat(this.amtInput.value);
-            const cat = this.catInput.value;
-
-            if(!date || !desc || isNaN(amt)) return alert("Please fill all fields correctly.");
-
-            this.entries.unshift({ id: Date.now(), date, desc, amt, cat });
-            localStorage.setItem('yotiraLedger', JSON.stringify(this.entries));
-            
-            this.descInput.value = ''; this.amtInput.value = '';
-            this.render();
-        }
-
-        render() {
-            this.tbody.innerHTML = '';
-            this.entries.forEach(e => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${e.date}</td>
-                    <td>${e.desc}</td>
-                    <td class="cat-${e.cat}">${e.cat}</td>
-                    <td>$${e.amt.toFixed(2)}</td>
-                `;
-                this.tbody.appendChild(tr);
-            });
-        }
-
-        exportCSV() {
-            if(this.entries.length === 0) return alert("No data to export.");
-            
-            let csvContent = "Date,Description,Category,Amount\n";
-            this.entries.forEach(e => {
-                csvContent += `${e.date},"${e.desc}",${e.cat},${e.amt}\n`;
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", "Yotira_Ledger.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    }
-
-    // 3. Yotira Financial Analysis Dashboard
+    // Finance App MODIFIED: Added Hybrid DB Sync (Task 5)
     class FinanceApp {
         constructor() {
             this.uploadInput = document.getElementById('fin-csv-upload');
             this.metricsDiv = document.getElementById('fin-metrics');
             this.chartsDiv = document.getElementById('fin-charts');
+            this.saveBtn = document.getElementById('fin-save-btn');
             
-            this.pieChart = null;
-            this.barChart = null;
+            this.pieChart = null; this.barChart = null;
+            this.currentReport = null;
 
             this.bindEvents();
         }
-
         bindEvents() {
             this.uploadInput.addEventListener('change', (e) => {
                 if(e.target.files.length > 0) this.parseCSV(e.target.files[0]);
             });
+            this.saveBtn.addEventListener('click', () => {
+                if(this.currentReport) {
+                    dbManager.hybridSave('FinancialReports', 'yotiraFinReports', [this.currentReport], this.currentReport);
+                    showToast('Financial Report Synced to Hybrid DB!');
+                }
+            });
         }
-
         parseCSV(file) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const lines = e.target.result.split('\n');
                 if(lines.length < 2) return alert("CSV file seems empty or invalid.");
-
-                // Dynamically find columns
                 const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
                 const revIdx = headers.findIndex(h => h.includes('revenue'));
                 const expIdx = headers.findIndex(h => h.includes('expense'));
+                if(revIdx === -1 || expIdx === -1) return alert("Invalid CSV Format. Require 'Revenue' and 'Expenses' columns.");
 
-                if(revIdx === -1 || expIdx === -1) {
-                    return alert("Invalid CSV Format. Please ensure columns are named 'Revenue' and 'Expenses'.");
-                }
-
-                let totalRev = 0;
-                let totalExp = 0;
-
+                let totalRev = 0; let totalExp = 0;
                 for(let i = 1; i < lines.length; i++) {
                     if(!lines[i].trim()) continue;
                     const cols = lines[i].split(',');
-                    totalRev += parseFloat(cols[revIdx]) || 0;
-                    totalExp += parseFloat(cols[expIdx]) || 0;
+                    totalRev += parseFloat(cols[revIdx]) || 0; totalExp += parseFloat(cols[expIdx]) || 0;
                 }
-
+                
+                this.currentReport = { revenue: totalRev, expenses: totalExp, net: (totalRev - totalExp), timestamp: new Date().toISOString() };
                 this.updateDashboard(totalRev, totalExp);
+                this.saveBtn.style.display = 'inline-flex';
             };
             reader.readAsText(file);
         }
-
         updateDashboard(rev, exp) {
             const net = rev - exp;
-            
             document.getElementById('metric-rev').textContent = `$${rev.toFixed(2)}`;
             document.getElementById('metric-exp').textContent = `$${exp.toFixed(2)}`;
             const netEl = document.getElementById('metric-net');
-            netEl.textContent = `$${net.toFixed(2)}`;
-            netEl.style.color = net >= 0 ? '#28a745' : '#dc3545';
-
-            this.metricsDiv.style.display = 'flex';
-            this.chartsDiv.style.display = 'flex';
-
+            netEl.textContent = `$${net.toFixed(2)}`; netEl.style.color = net >= 0 ? '#28a745' : '#dc3545';
+            this.metricsDiv.style.display = 'flex'; this.chartsDiv.style.display = 'flex';
             this.renderCharts(rev, exp);
         }
-
         renderCharts(rev, exp) {
-            // Destroy existing charts to prevent canvas overlap issues
-            if(this.pieChart) this.pieChart.destroy();
-            if(this.barChart) this.barChart.destroy();
-
+            if(this.pieChart) this.pieChart.destroy(); if(this.barChart) this.barChart.destroy();
             const pieCtx = document.getElementById('fin-pie-chart').getContext('2d');
             const barCtx = document.getElementById('fin-bar-chart').getContext('2d');
+            this.pieChart = new Chart(pieCtx, { type: 'pie', data: { labels: ['Revenue', 'Expenses'], datasets: [{ data: [rev, exp], backgroundColor: ['#28a745', '#dc3545'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Revenue vs Expenses Ratio' } } } });
+            this.barChart = new Chart(barCtx, { type: 'bar', data: { labels: ['Financial Overview'], datasets: [ { label: 'Revenue', data: [rev], backgroundColor: '#28a745' }, { label: 'Expenses', data: [exp], backgroundColor: '#dc3545' }, { label: 'Net Profit', data: [rev - exp], backgroundColor: '#007aff' } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Absolute Performance' } } } });
+        }
+    }
 
-            this.pieChart = new Chart(pieCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Revenue', 'Expenses'],
-                    datasets: [{
-                        data: [rev, exp],
-                        backgroundColor: ['#28a745', '#dc3545']
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Revenue vs Expenses Ratio' } } }
+
+    /* =========================================================
+       NEW APPENDED APPS (Task 3 & 4: Contacts, Docs, Sheets)
+       ========================================================= */
+
+    class ContactsApp {
+        constructor() {
+            this.contacts = JSON.parse(localStorage.getItem('yotiraContacts')) || [];
+            this.nameInput = document.getElementById('contact-name');
+            this.phoneInput = document.getElementById('contact-phone');
+            this.emailInput = document.getElementById('contact-email');
+            this.listEl = document.getElementById('contacts-list');
+            
+            this.bindEvents();
+            this.render();
+        }
+
+        bindEvents() {
+            document.getElementById('contact-save-btn').addEventListener('click', () => this.saveContact());
+        }
+
+        saveContact() {
+            const name = this.nameInput.value.trim();
+            const phone = this.phoneInput.value.trim();
+            const email = this.emailInput.value.trim();
+
+            if(!name || !phone) return alert("Name and Phone are required.");
+
+            const newContact = { id: Date.now(), name, phone, email };
+            this.contacts.unshift(newContact);
+            
+            // HYBRID DB SYNC (Task 5)
+            dbManager.hybridSave('Contacts', 'yotiraContacts', this.contacts, newContact);
+            
+            this.nameInput.value = ''; this.phoneInput.value = ''; this.emailInput.value = '';
+            showToast('Contact Saved!');
+            this.render();
+        }
+
+        render() {
+            this.listEl.innerHTML = '';
+            if(this.contacts.length === 0) {
+                this.listEl.innerHTML = '<p style="color:#888;">No contacts found.</p>';
+                return;
+            }
+
+            this.contacts.forEach(c => {
+                const li = document.createElement('li');
+                li.className = 'contact-item';
+                li.innerHTML = `
+                    <div class="contact-info">
+                        <span class="contact-name">${c.name}</span>
+                        <div class="contact-meta">
+                            <span><span class="material-icons-round" style="font-size:12px;">phone</span> ${c.phone}</span>
+                            ${c.email ? `<span><span class="material-icons-round" style="font-size:12px;">email</span> ${c.email}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+                this.listEl.appendChild(li);
             });
+        }
+    }
 
-            this.barChart = new Chart(barCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Financial Overview'],
-                    datasets: [
-                        { label: 'Revenue', data: [rev], backgroundColor: '#28a745' },
-                        { label: 'Expenses', data: [exp], backgroundColor: '#dc3545' },
-                        { label: 'Net Profit', data: [rev - exp], backgroundColor: '#007aff' }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Absolute Performance' } } }
+    class DocsApp {
+        constructor() {
+            this.titleInput = document.getElementById('docs-title');
+            this.saveBtn = document.getElementById('docs-save-btn');
+            this.quill = null;
+            
+            this.bindEvents();
+        }
+        
+        initEditor() {
+            if(this.quill) return;
+            this.quill = new Quill('#editor-container', { theme: 'snow', placeholder: 'Start writing your document...' });
+            
+            const savedDoc = JSON.parse(localStorage.getItem('yotiraDocs_Draft'));
+            if(savedDoc) {
+                this.titleInput.value = savedDoc.title;
+                this.quill.setContents(savedDoc.content);
+            }
+        }
+
+        bindEvents() {
+            this.saveBtn.addEventListener('click', () => {
+                if(!this.quill) return;
+                const docData = { title: this.titleInput.value.trim() || 'Untitled', content: this.quill.getContents(), timestamp: new Date().toISOString() };
+                
+                // HYBRID DB SYNC (Task 5)
+                dbManager.hybridSave('Documents', 'yotiraDocs_Draft', docData, docData);
+                showToast('Document Synced to Cloud!');
+            });
+        }
+    }
+
+    class SheetsApp {
+        constructor() {
+            this.container = document.getElementById('spreadsheet-container');
+            this.saveBtn = document.getElementById('sheets-save-btn');
+            this.sheet = null;
+            
+            this.bindEvents();
+        }
+        
+        initSheet() {
+            if(this.sheet) return;
+            let initialData = [ ['', '', '', ''], ['', '', '', ''], ['', '', '', ''], ['', '', '', ''] ];
+            
+            const savedSheet = JSON.parse(localStorage.getItem('yotiraSheets_Draft'));
+            if(savedSheet && savedSheet.data) { initialData = savedSheet.data; }
+            
+            this.sheet = jspreadsheet(this.container, {
+                data: initialData,
+                minDimensions: [8, 10],
+                defaultColWidth: 100,
+                tableOverflow: true,
+                tableWidth: "100%",
+                tableHeight: "350px"
+            });
+        }
+
+        bindEvents() {
+            this.saveBtn.addEventListener('click', () => {
+                if(!this.sheet) return;
+                const sheetData = { data: this.sheet.getData(), timestamp: new Date().toISOString() };
+                
+                // HYBRID DB SYNC (Task 5)
+                dbManager.hybridSave('Spreadsheets', 'yotiraSheets_Draft', sheetData, sheetData);
+                showToast('Spreadsheet Synced to Cloud!');
             });
         }
     }
@@ -933,7 +1090,6 @@ document.addEventListener("DOMContentLoaded", () => {
     new TasksApp();
     new AIApp();
     new ATSApp();
-    // ChessApp Removed
     new FlowApp();
     new CalendarApp();
     new StickyNotesApp();
@@ -941,12 +1097,17 @@ document.addEventListener("DOMContentLoaded", () => {
     new WhiteboardApp();
     new AnnouncementApp();
     new ConferenceApp();
+    
+    // Initialize Modded Financial Apps
     new PollApp();
     new SmartCabinApp();
-
-    // Initialize New Financial Apps
     new InvoiceApp();
     new LedgerApp();
     new FinanceApp();
+
+    // Initialize New Appended Apps (Task 3 & 4)
+    new ContactsApp();
+    window.quillApp = new DocsApp(); // Expose for Window Manager Initialization
+    window.sheetsApp = new SheetsApp(); // Expose for Window Manager Initialization
 
 });

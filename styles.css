@@ -17,8 +17,8 @@ body, html { width: 100vw; height: 100vh; overflow: hidden; }
   background-size: cover; position: relative; display: flex; flex-direction: column;
 }
 
-/* Center-Left Desktop Grid */
-.grid-layout.center-left { position: absolute; top: 50%; left: 40px; transform: translateY(-50%); display: grid; grid-template-columns: repeat(3, 80px); gap: 20px 30px; }
+/* Center-Left Desktop Grid - EXPANDED TO 4 COLUMNS FOR ALL APPS */
+.grid-layout.center-left { position: absolute; top: 50%; left: 40px; transform: translateY(-50%); display: grid; grid-template-columns: repeat(4, 80px); gap: 20px 30px; }
 
 /* Squircle Icons */
 .app-icon, .dock-icon { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.2s ease; }
@@ -46,10 +46,13 @@ body, html { width: 100vw; height: 100vh; overflow: hidden; }
 .conf-color { background: linear-gradient(135deg, #4facfe, #00f2fe); }
 .poll-color { background: linear-gradient(135deg, #fa709a, #fee140); }
 .cabin-color { background: linear-gradient(135deg, #43e97b, #38f9d7); }
-/* NEW FINANCIAL ICON COLORS */
 .inv-color { background: linear-gradient(135deg, #8e2de2, #4a00e0); }
 .ledger-color { background: linear-gradient(135deg, #00b09b, #96c93d); }
 .fin-color { background: linear-gradient(135deg, #cb2d3e, #ef473a); }
+/* NEW APP COLORS */
+.contacts-color { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.docs-color { background: linear-gradient(135deg, #2980b9, #6dd5fa); }
+.sheets-color { background: linear-gradient(135deg, #11998e, #38ef7d); }
 
 .app-label { margin-top: 8px; color: white; font-size: 12px; font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.8); text-align: center; }
 
@@ -88,7 +91,25 @@ body, html { width: 100vw; height: 100vh; overflow: hidden; }
 .tasks-app { display: flex; flex-direction: column; height: 100%; background: #f9f9f9; } .tasks-header h2 { font-size: 24px; color: #333; margin-bottom: 20px; font-weight: 600; } .tasks-input-area { display: flex; gap: 10px; margin-bottom: 20px; } .tasks-input-area input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; transition: 0.2s; } .tasks-input-area input:focus { border-color: #007aff; } .tasks-input-area button { padding: 12px 20px; background: #007aff; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: 600; transition: 0.2s; } .tasks-input-area button:active { transform: scale(0.95); } #task-list { list-style: none; overflow-y: auto; flex: 1; padding-bottom: 20px; } .task-item { display: flex; align-items: center; background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: 0.3s ease; border: 1px solid #eee; } .task-item.completed { background: #fcfcfc; } .task-item.completed .task-text { text-decoration: line-through; color: #888; } .task-checkbox { margin-right: 15px; cursor: pointer; width: 18px; height: 18px; accent-color: #007aff; } .task-text { flex: 1; font-size: 16px; color: #333; transition: color 0.3s, text-decoration 0.3s; word-break: break-word; } .task-delete { background: none; border: none; color: #ff3b30; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; border-radius: 4px; transition: 0.2s; } .task-delete:hover { background: #fee8e7; }
 .gsc-control-cse { padding: 0 !important; border: none !important; background: transparent !important; } .gsc-search-box { margin-bottom: 20px !important; } .gsc-input-box { border-radius: 24px !important; border: 1px solid #dfe1e5 !important; padding: 2px 10px !important; box-shadow: 0 1px 6px rgba(32,33,36,.28) !important; background: white !important; } .gsc-input-box:focus-within { box-shadow: 0 1px 6px rgba(32,33,36,.5) !important; } .gsc-search-button-v2 { border-radius: 20px !important; padding: 10px 22px !important; background-color: #007aff !important; border: none !important; cursor: pointer !important; } .gsc-search-button-v2 svg { fill: #fff !important; } .gsc-result { padding: 15px 0 !important; border-bottom: 1px solid #eee !important; } .gs-title { color: #1a0dab !important; text-decoration: none !important; font-size: 18px !important; font-weight: 400 !important; } .gs-title:hover { text-decoration: underline !important; } .gs-snippet { font-size: 14px !important; color: #4d5156 !important; line-height: 1.58 !important; margin-top: 5px !important; } .gsc-url-top { color: #006621 !important; font-size: 14px !important; margin-bottom: 4px !important; }
 @keyframes spin { 100% { transform: rotate(360deg); } } .ats-app { background: #fdfdfd; display: flex; flex-direction: column; gap: 20px; } .ats-header h2 { color: #333; margin-bottom: 5px; } .ats-header p { color: #666; font-size: 14px; } .ats-upload-box { border: 2px dashed #007aff; border-radius: 12px; padding: 30px; text-align: center; background: #f0f7ff; } .ats-upload-box input { margin-bottom: 15px; } .ats-upload-box button { padding: 10px 20px; background: #007aff; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; } .ats-upload-box button:active { transform: scale(0.95); } .ats-review-card { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px;} .ats-review-card h3 { margin-bottom: 10px; color: #333; font-size: 18px; } .job-link-btn { display: inline-block; padding: 10px 15px; background: #0a66c2; color: white; text-decoration: none; border-radius: 6px; margin: 5px 5px 0 0; font-size: 14px; font-weight: 500; transition: 0.2s;} .job-link-btn:hover { background: #004182; }
-.flow-app { display: flex; flex-direction: column; height: 100%; background: #f4f5f7; padding: 15px !important; } .flow-header { display: flex; gap: 10px; margin-bottom: 15px; } .flow-header input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; outline: none; } .flow-header button { padding: 10px 20px; background: #0052cc; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; } .kanban-board { display: flex; gap: 15px; flex: 1; overflow-x: auto; } .kanban-col { background: #ebecf0; border-radius: 8px; width: 33%; min-width: 220px; display: flex; flex-direction: column; padding: 10px; } .kanban-col h3 { font-size: 14px; color: #172b4d; margin-bottom: 10px; padding-left: 5px; } .kanban-dropzone { flex: 1; min-height: 50px; display: flex; flex-direction: column; gap: 8px; } .kanban-card { background: white; padding: 12px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: grab; font-size: 14px; color: #172b4d; position: relative; border-left: 4px solid #0052cc; word-break: break-word;} .kanban-card:active { cursor: grabbing; } .kanban-card .del-card { position: absolute; top: 5px; right: 5px; background: none; border: none; color: #888; cursor: pointer; font-size: 12px; } .kanban-card .del-card:hover { color: red; } .drag-over { background: rgba(0,0,0,0.05); border: 2px dashed #bbb; border-radius: 6px; }
+
+/* MODIFIED TASK 1: Modern Corporate Flow UI Revamp (Notion/Asana Style) */
+.flow-app { background: #ffffff; padding: 25px !important; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; height: 100%; } 
+.flow-header { display: flex; gap: 12px; margin-bottom: 25px; } 
+.flow-header input { flex: 1; padding: 12px 16px; border: 1px solid #e1e4e8; border-radius: 6px; outline: none; background: #f6f8fa; font-size: 14px; transition: border 0.2s; } 
+.flow-header input:focus { border-color: #0366d6; background: #ffffff; box-shadow: 0 0 0 3px rgba(3,102,214,0.1); }
+.flow-header button { padding: 12px 24px; background: #2ea44f; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; transition: 0.2s; } 
+.flow-header button:hover { background: #2c974b; }
+.kanban-board { display: flex; gap: 20px; flex: 1; overflow-x: auto; padding-bottom: 10px; } 
+.kanban-col { background: #f9f9f9; border: 1px solid #e1e4e8; border-radius: 10px; width: 33%; min-width: 260px; display: flex; flex-direction: column; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); } 
+.kanban-col h3 { font-size: 15px; font-weight: 600; color: #24292e; margin-bottom: 16px; padding-left: 4px; display: flex; align-items: center; gap: 8px;} 
+.kanban-dropzone { flex: 1; min-height: 50px; display: flex; flex-direction: column; gap: 10px; } 
+.kanban-card { background: #ffffff; padding: 16px; border-radius: 8px; border: 1px solid #e1e4e8; box-shadow: 0 1px 2px rgba(0,0,0,0.04); cursor: grab; font-size: 14px; color: #24292e; position: relative; word-break: break-word; transition: transform 0.2s, box-shadow 0.2s;} 
+.kanban-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.08); border-color: #0366d6;}
+.kanban-card:active { cursor: grabbing; } 
+.kanban-card .del-card { position: absolute; top: 8px; right: 8px; background: none; border: none; color: #959da5; cursor: pointer; font-size: 14px; transition: color 0.2s; } 
+.kanban-card .del-card:hover { color: #d73a49; } 
+.drag-over { background: rgba(3,102,214,0.05); border: 2px dashed #0366d6; border-radius: 10px; }
+
 .calendar-app { display: flex; flex-direction: column; height: 100%; background: white; } .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; } .cal-header button { background: none; border: none; cursor: pointer; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; } .cal-header button:hover { background: #f0f0f0; } .cal-grid-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: 600; color: #666; margin-bottom: 10px; font-size: 14px;} .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; flex: 1; } .cal-day { border: 1px solid #eee; border-radius: 8px; padding: 5px; min-height: 60px; cursor: pointer; display: flex; flex-direction: column; position: relative; transition: 0.2s;} .cal-day:hover { background: #f9f9f9; border-color: #007aff; } .cal-day.empty { background: transparent; border: none; cursor: default; } .cal-day.today { background: #e6f2ff; border-color: #007aff; } .cal-date-num { font-weight: 500; margin-bottom: 5px; font-size: 14px; } .cal-event-dot { width: 8px; height: 8px; background: #ff3b30; border-radius: 50%; margin: 2px auto; } .cal-event-text { font-size: 10px; color: #333; text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; background: #ffe5e5; border-radius: 4px; padding: 2px; margin-top: auto;}
 .sticky-app { position: relative; background: #e5e5ea; overflow: hidden; } .sticky-controls { position: absolute; top: 15px; left: 15px; z-index: 10; } .sticky-note { position: absolute; width: 200px; min-height: 200px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; flex-direction: column; border-radius: 2px 15px 2px 2px; } .sticky-header { height: 25px; background: rgba(0,0,0,0.05); cursor: move; display: flex; justify-content: flex-end; align-items: center; padding: 0 5px; gap: 5px; } .sticky-color-btn { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); cursor: pointer; } .sticky-del-btn { background: none; border: none; color: rgba(0,0,0,0.5); cursor: pointer; font-size: 12px; font-weight: bold; } .sticky-note textarea { flex: 1; background: transparent; border: none; resize: none; outline: none; padding: 15px; font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; font-size: 14px; line-height: 1.5; color: #333; }
 .vault-app { display: flex; flex-direction: column; background: #fdfdfd; height: 100%; } .vault-upload-zone { border: 2px dashed #ccc; border-radius: 12px; padding: 40px 20px; text-align: center; background: #fafafa; cursor: pointer; transition: 0.2s; margin-bottom: 20px;} .vault-upload-zone:hover, .vault-upload-zone.drag-over { border-color: #007aff; background: #f0f7ff; } .vault-upload-zone p { font-size: 16px; color: #333; margin: 10px 0 5px; font-weight: 500;} .vault-upload-zone small { color: #888; } .vault-list-header { font-weight: 600; color: #333; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #eee; } .vault-list { list-style: none; overflow-y: auto; flex: 1; } .vault-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #eee; transition: 0.2s; } .vault-item:hover { background: #f9f9f9; } .vault-item-info { display: flex; flex-direction: column; } .vault-item-name { font-size: 14px; font-weight: 500; color: #333; } .vault-item-meta { font-size: 12px; color: #888; margin-top: 4px; } .vault-actions { display: flex; gap: 10px; } .vault-btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 4px;} .btn-view { background: #e6f2ff; color: #007aff; } .btn-del { background: #fee8e7; color: #ff3b30; }
@@ -97,47 +118,35 @@ body, html { width: 100vw; height: 100vh; overflow: hidden; }
 .conf-app { display: flex; justify-content: center; align-items: center; height: 100%; background: linear-gradient(135deg, #f5f7fa, #c3cfe2); } .conf-hero { background: white; padding: 40px; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 400px; } .conf-icon { font-size: 64px; color: #007aff; margin-bottom: 20px; } .conf-hero h2 { margin-bottom: 10px; color: #333; } .conf-hero p { color: #666; margin-bottom: 30px; line-height: 1.5; } .conf-btn { width: 100%; justify-content: center; font-size: 16px; padding: 12px; border-radius: 8px; }
 .poll-app { display: flex; flex-direction: column; height: 100%; background: #fdfdfd; } .poll-create-form { display: flex; flex-direction: column; gap: 12px; max-width: 500px; margin: 0 auto; width: 100%; background: white; padding: 20px; border-radius: 8px; border: 1px solid #eee; } .poll-create-form input { padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; outline: none; } .poll-create-form input:focus { border-color: #007aff; } #poll-q { font-weight: 600; font-size: 16px; margin-bottom: 10px; } #poll-list-container { display: flex; flex-direction: column; gap: 20px; } .poll-card { background: white; border: 1px solid #eee; border-radius: 8px; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); } .poll-card h3 { margin-bottom: 15px; color: #333; } .poll-option-btn { width: 100%; position: relative; background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; padding: 12px 15px; margin-bottom: 8px; cursor: pointer; overflow: hidden; text-align: left; transition: 0.2s; } .poll-option-btn:hover { background: #f0f0f0; } .poll-bar { position: absolute; top: 0; left: 0; height: 100%; background: #cce5ff; z-index: 1; transition: width 0.4s ease; } .poll-opt-text { position: relative; z-index: 2; display: flex; justify-content: space-between; font-size: 14px; color: #333; font-weight: 500; }
 .cabin-app { position: relative; height: 100%; background: #2c3e50; color: white; display: flex; justify-content: center; align-items: center; text-align: center; } .cabin-dashboard h2 { font-weight: 300; margin-bottom: 30px; letter-spacing: 1px; color: #bdc3c7; } .cabin-status-display { display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); padding: 40px 60px; border-radius: 20px; margin-bottom: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); } .status-dot { width: 24px; height: 24px; border-radius: 50%; margin-bottom: 15px; box-shadow: 0 0 15px currentColor; } .cabin-status-display h1 { font-size: 42px; font-weight: 600; letter-spacing: 2px; } #cabin-subtext { font-size: 16px; color: #bdc3c7; } .cabin-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); } .cabin-modal-content { background: white; color: #333; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2); } .cabin-modal-content h3 { margin-bottom: 10px; color: #111; } .cabin-modal-content p { color: #666; margin-bottom: 20px; } .cabin-modal-actions { display: flex; flex-direction: column; gap: 10px; } .cabin-res-btn { padding: 12px; border: none; border-radius: 6px; font-weight: 600; font-size: 15px; cursor: pointer; transition: 0.2s; color: white; } .cabin-res-btn.free { background: #28a745; } .cabin-res-btn.meeting { background: #f39c12; } .cabin-res-btn.dnd { background: #e74c3c; } .cabin-res-btn:hover { opacity: 0.9; transform: scale(0.98); }
+.inv-app { display: flex; flex-direction: column; background: #e9ecef; height: 100%; padding: 0 !important;} .inv-controls-area { padding: 20px; background: white; border-bottom: 1px solid #ddd; display: flex; flex-direction: column; gap: 10px; } .inv-inputs { display: flex; gap: 10px; } .inv-inputs input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; outline: none; } .invoice-paper-wrapper { flex: 1; overflow-y: auto; padding: 20px; display: flex; justify-content: center; } .invoice-paper { background: white; width: 100%; max-width: 800px; padding: 40px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-radius: 4px; color: #333; } .inv-paper-header { display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 10px;} .inv-paper-header h1 { font-weight: 300; letter-spacing: 2px; } .inv-meta p { margin-bottom: 5px; font-size: 14px; } .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; } .inv-table th, .inv-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; } .inv-table th { background: #f8f9fa; font-weight: 600; } .inv-summary { text-align: right; padding-top: 20px; border-top: 2px solid #333; } .inv-summary p { margin-bottom: 8px; font-size: 16px; color: #555; } .inv-summary h3 { font-size: 24px; color: #111; margin-top: 10px; }
+.ledger-app { display: flex; flex-direction: column; height: 100%; background: #fff; } .ledger-header { display: flex; gap: 10px; margin-bottom: 15px; } .ledger-header input, .ledger-header select { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; outline: none; } .ledger-actions { display: flex; justify-content: flex-end; margin-bottom: 15px; } .ledger-table-container { flex: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; } .data-table { width: 100%; border-collapse: collapse; } .data-table th, .data-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; } .data-table th { background: #f8f9fa; font-weight: 600; color: #333; position: sticky; top: 0; } .data-table tr:hover { background: #fcfcfc; } .cat-Income { color: #28a745; font-weight: 500; } .cat-Expense { color: #dc3545; font-weight: 500; }
+.fin-app { display: flex; flex-direction: column; height: 100%; background: #f4f7f6; padding: 20px; overflow-y: auto; } .fin-upload-area { background: white; padding: 30px; border-radius: 12px; text-align: center; border: 2px dashed #adb5bd; margin-bottom: 20px; } .fin-upload-area p { margin-bottom: 15px; color: #555; } .fin-metrics { display: flex; gap: 20px; margin-bottom: 20px; } .metric-card { flex: 1; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; } .metric-card h4 { color: #6c757d; font-size: 14px; text-transform: uppercase; margin-bottom: 10px; } .fin-charts { display: flex; gap: 20px; flex-wrap: wrap; } .chart-container { flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 
 /* ==============================================
- NEW APPENDED STYLES (Financial / ERP Apps)
+ NEW APPENDED CSS FOR TASK 3 & 4 (Contacts, Docs, Sheets)
  ============================================== */
 
-/* 1. Yotira Invoice */
-.inv-app { display: flex; flex-direction: column; background: #e9ecef; height: 100%; padding: 0 !important;}
-.inv-controls-area { padding: 20px; background: white; border-bottom: 1px solid #ddd; display: flex; flex-direction: column; gap: 10px; }
-.inv-inputs { display: flex; gap: 10px; }
-.inv-inputs input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; outline: none; }
-.invoice-paper-wrapper { flex: 1; overflow-y: auto; padding: 20px; display: flex; justify-content: center; }
-.invoice-paper { background: white; width: 100%; max-width: 800px; padding: 40px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-radius: 4px; color: #333; }
-.inv-paper-header { display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 10px;}
-.inv-paper-header h1 { font-weight: 300; letter-spacing: 2px; }
-.inv-meta p { margin-bottom: 5px; font-size: 14px; }
-.inv-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-.inv-table th, .inv-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-.inv-table th { background: #f8f9fa; font-weight: 600; }
-.inv-summary { text-align: right; padding-top: 20px; border-top: 2px solid #333; }
-.inv-summary p { margin-bottom: 8px; font-size: 16px; color: #555; }
-.inv-summary h3 { font-size: 24px; color: #111; margin-top: 10px; }
+/* Contacts App */
+.contacts-app { display: flex; flex-direction: column; height: 100%; background: #fcfcfc; }
+.contacts-form { display: flex; gap: 10px; margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+.contacts-form input { flex: 1; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; outline: none; transition: 0.2s; }
+.contacts-form input:focus { border-color: #007aff; }
+.contacts-list-container { flex: 1; overflow-y: auto; }
+.contacts-list-container h3 { color: #333; margin-bottom: 15px; font-weight: 600; }
+#contacts-list { list-style: none; }
+.contact-item { background: white; padding: 15px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+.contact-info { display: flex; flex-direction: column; gap: 4px; }
+.contact-name { font-weight: 600; color: #111; font-size: 16px; }
+.contact-meta { color: #666; font-size: 14px; display: flex; gap: 15px; }
 
-/* 2. Yotira Ledger */
-.ledger-app { display: flex; flex-direction: column; height: 100%; background: #fff; }
-.ledger-header { display: flex; gap: 10px; margin-bottom: 15px; }
-.ledger-header input, .ledger-header select { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; outline: none; }
-.ledger-actions { display: flex; justify-content: flex-end; margin-bottom: 15px; }
-.ledger-table-container { flex: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; }
-.data-table { width: 100%; border-collapse: collapse; }
-.data-table th, .data-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
-.data-table th { background: #f8f9fa; font-weight: 600; color: #333; position: sticky; top: 0; }
-.data-table tr:hover { background: #fcfcfc; }
-.cat-Income { color: #28a745; font-weight: 500; }
-.cat-Expense { color: #dc3545; font-weight: 500; }
+/* Docs App */
+.docs-app { display: flex; flex-direction: column; height: 100%; background: white; padding: 0 !important; }
+.docs-header { display: flex; gap: 10px; padding: 15px; border-bottom: 1px solid #ddd; background: #fafafa; }
+.docs-header input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; outline: none; font-size: 16px; font-weight: 500; }
+#editor-container { flex: 1; border: none; }
+.ql-toolbar.ql-snow { border: none; border-bottom: 1px solid #ccc; background: #fcfcfc; }
+.ql-container.ql-snow { border: none; }
 
-/* 3. Financial Analysis */
-.fin-app { display: flex; flex-direction: column; height: 100%; background: #f4f7f6; padding: 20px; overflow-y: auto; }
-.fin-upload-area { background: white; padding: 30px; border-radius: 12px; text-align: center; border: 2px dashed #adb5bd; margin-bottom: 20px; }
-.fin-upload-area p { margin-bottom: 15px; color: #555; }
-.fin-metrics { display: flex; gap: 20px; margin-bottom: 20px; }
-.metric-card { flex: 1; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; }
-.metric-card h4 { color: #6c757d; font-size: 14px; text-transform: uppercase; margin-bottom: 10px; }
-.fin-charts { display: flex; gap: 20px; flex-wrap: wrap; }
-.chart-container { flex: 1; min-width: 300px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+/* Sheets App */
+.sheets-app { display: flex; flex-direction: column; height: 100%; background: white; padding: 0 !important;}
+.sheets-header { padding: 15px; border-bottom: 1px solid #ddd; background: #fafafa; }
