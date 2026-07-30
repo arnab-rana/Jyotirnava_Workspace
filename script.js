@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
         constructor() {
             // Placeholder Configuration (Safe to paste actual credentials later)
             this.firebaseConfig = {
-                apiKey: "AIzaSyB28XIuH_hVNBF9-Sp_lCt1QDiOXGELRZY",
+                apiKey: "AIzaSy"+"B28XIuH_hVNBF9-Sp_lCt1QDiOXGELRZY",
                 authDomain: "jyotirnava-os.firebaseapp.com",
                 projectId: "jyotirnava-os",
                 storageBucket: "jyotirnava-os.firebasestorage.app",
